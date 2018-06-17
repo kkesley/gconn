@@ -14,9 +14,9 @@ import (
 )
 
 //MysqlConnect to mysql db based on DB_BUCKET
-func MysqlConnect() (*gorm.DB, error) {
+func MysqlConnect(region string) (*gorm.DB, error) {
 	config := aws.Config{
-		Region: aws.String("ap-southeast-2"),
+		Region: aws.String(region),
 	}
 	sess := session.Must(session.NewSession(&config))
 
