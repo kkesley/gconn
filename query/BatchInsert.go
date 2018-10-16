@@ -8,10 +8,10 @@ import (
 )
 
 //BatchInsert insert multiple rows of items to DB
-func BatchInsert(db *gorm.DB, objArr []interface{}) error {
+func BatchInsert(db *gorm.DB, objArr []interface{}) (uint64, error) {
 	// If there is no data, nothing to do.
 	if len(objArr) == 0 {
-		return nil
+		return 0, nil
 	}
 
 	mainObj := objArr[0]
@@ -52,7 +52,16 @@ func BatchInsert(db *gorm.DB, objArr []interface{}) error {
 	))
 
 	if _, err := mainScope.SQLDB().Exec(mainScope.SQL, mainScope.SQLVars...); err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	rows, err := db.Raw("SELECT LAST_INSERT_ID() AS lastid").Rows()
+	var lastInsertID uint64
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&lastInsertID)
+	}
+	return lastInsertID, nil
 }
