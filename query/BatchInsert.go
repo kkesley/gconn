@@ -21,9 +21,10 @@ func BatchInsert(db *gorm.DB, objArr []interface{}) (uint64, error) {
 	for i := range mainFields {
 		// If primary key has blank value (0 for int, "" for string, nil for interface ...), skip it.
 		// If field is ignore field, skip it.
-		if (mainFields[i].IsPrimaryKey && mainFields[i].IsBlank) || (mainFields[i].IsIgnored) {
+		if (mainFields[i].IsPrimaryKey && mainFields[i].IsBlank) || (mainFields[i].IsIgnored) || (!mainFields[i].IsNormal) {
 			continue
 		}
+
 		quoted = append(quoted, mainScope.Quote(mainFields[i].DBName))
 	}
 
@@ -34,7 +35,7 @@ func BatchInsert(db *gorm.DB, objArr []interface{}) (uint64, error) {
 		fields := scope.Fields()
 		placeholders := make([]string, 0, len(fields))
 		for i := range fields {
-			if (fields[i].IsPrimaryKey && fields[i].IsBlank) || (fields[i].IsIgnored) {
+			if (fields[i].IsPrimaryKey && fields[i].IsBlank) || (fields[i].IsIgnored) || (!mainFields[i].IsNormal) {
 				continue
 			}
 			placeholders = append(placeholders, scope.AddToVars(fields[i].Field.Interface()))
